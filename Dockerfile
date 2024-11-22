@@ -1,8 +1,23 @@
-# Container image that runs your code
-FROM back4app/b4a_cli:latest
+# Use the official PHP image as the base image
+FROM php:7.4-apache
 
-# Copies your code file from your action repository to the filesystem path `/` of the container
-COPY entrypoint.sh /entrypoint.sh
+# Copy the application files into the container
+COPY . /var/www/html
 
-# Code file to execute when the docker container starts up (`entrypoint.sh`)
-ENTRYPOINT ["/entrypoint.sh"]
+# Set the working directory in the container
+WORKDIR /var/www/html
+
+# Install necessary PHP extensions
+RUN apt-get update && apt-get install -y \
+    libicu-dev \
+    libzip-dev \
+    && docker-php-ext-install \
+    intl \
+    zip \
+    && a2enmod rewrite
+
+# Expose port 80
+EXPOSE 80
+
+# Define the entry point for the container
+CMD ["apache2-foreground"]
